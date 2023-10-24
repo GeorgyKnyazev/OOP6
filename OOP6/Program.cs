@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Schema;
 
 namespace OOP6
 {
@@ -12,16 +8,9 @@ namespace OOP6
         static void Main(string[] args)
         {
             Seller seller = new Seller(0);
-            Bayer bayer = new Bayer(1000);
+            Bayer bayer = new Bayer(70);
 
-            seller.AddProduct(new Product("чай", 10));
-            seller.AddProduct(new Product("кофе", 20));
-            seller.AddProduct(new Product("хлеб", 30));
-            seller.AddProduct(new Product("торт", 40));
-            seller.AddProduct(new Product("яблоко", 50));
-            seller.AddProduct(new Product("виноград", 60));
-            seller.AddProduct(new Product("апельсин", 70));
-            seller.AddProduct(new Product("лимон", 80));
+            seller.ProductsAdd();
 
             const ConsoleKey ShowSellerProduktInMenu = ConsoleKey.D1;
             const ConsoleKey ShowBayerProduktInMenu = ConsoleKey.D2;
@@ -49,7 +38,7 @@ namespace OOP6
                         bayer.ShowAllProduct();
                         break;
                     case BayProduktInMenu:
-                        bayer.AddProduct(seller.SellProduct());
+                        seller.SellProduct(bayer);
                         break;
                     case ExitInMenu:
                         isWork = false;
@@ -61,26 +50,17 @@ namespace OOP6
 
     class Human
     {
+        protected List<Product> _products = new List<Product>();
+        protected int _money;
+
         public Human(int money)
         {
-            Money = money;
+            _money = money;
         }
-        public int Money { get; private set; }
-    }
-
-    class Seller : Human
-    {
-        private List<Product> _products = new List<Product>();
-        public Seller(int money) : base(money) { }
-
-        public void AddProduct(Product product)
-        {
-            _products.Add(product);
-        }
-
         public void ShowAllProduct()
         {
             Console.Clear();
+            Console.WriteLine("В кошельке:" + _money + "рублей");
 
             foreach (Product product in _products)
             {
@@ -90,44 +70,58 @@ namespace OOP6
             Console.ReadKey();
         }
 
-        public Product SellProduct()
+        protected void AddProduct(Product product)
         {
-            Product product = null;
+            _products.Add(product);
+        }
+
+    }
+
+    class Seller : Human
+    {
+        public Seller(int money) : base(money) { }
+
+        public void SellProduct(Bayer bayer)
+        {
+            Product product;
+
+            bool isProductOnList = TryGetProduct(out product);
+
+            if(isProductOnList == true)
+            {
+                if (bayer.CheckSolvency(product.Price))
+                {
+                    bayer.Bay(product);
+                    Sell(product);
+                    Console.WriteLine("Товар куплен");
+                    Console.ReadKey();
+                }
+                else
+                {
+                    Console.WriteLine("У клиента не достаточно средств");
+                    Console.ReadKey();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Такого продукта в списке нет");
+                Console.ReadKey();
+            }
+        }
+
+        private bool TryGetProduct(out Product product)
+        {
+            bool isFind = false;
+            product = null;
 
             Console.Write("Введите имя товара: ");
             string userInput = Console.ReadLine();
 
-            bool isProductInList = FindProduct(userInput);
-
-            if(isProductInList == true)
-            {
-                product = ReturnProduct(userInput);
-                DeleteProduct(userInput);
-            }
-
-            return product;
-        }
-        private Product ReturnProduct(string userInput)
-        {
-            Product product = null;
-
-            foreach (Product products in _products)
+            foreach(Product products in _products)
             {
                 if (products.Name == userInput)
                 {
                     product = products;
-                }
-            }
-            return product;
-        }
-        private bool FindProduct(string userInput)
-        {
-            bool isFind = false;
-
-            foreach (Product product in _products)
-            {
-                if (product.Name == userInput)
-                {
                     isFind = true;
                 }
             }
@@ -135,43 +129,39 @@ namespace OOP6
             return isFind;
         }
 
-        private void DeleteProduct(string userInput)
+        public Product Sell(Product product)
         {
-            Product product = null;
-
-            foreach (Product products in _products)
-            {
-                if (products.Name == userInput)
-                {
-                    product = products; 
-                }
-            }
-
+            _money += product.Price;
             _products.Remove(product);
+            return product;
+        }
+
+        public void ProductsAdd()
+        {
+            _products.Add(new Product("чай", 10));
+            _products.Add(new Product("кофе", 20));
+            _products.Add(new Product("хлеб", 30));
+            _products.Add(new Product("торт", 40));
+            _products.Add(new Product("яблоко", 50));
+            _products.Add(new Product("виноград", 60));
+            _products.Add(new Product("апельсин", 70));
+            _products.Add(new Product("лимон", 80));
         }
     }
 
     class Bayer : Human
     {
-        private List<Product> _products = new List<Product>();
-
         public Bayer(int money) : base(money) { }
 
-        public void AddProduct(Product product)
+        public bool CheckSolvency(int prise)
         {
-            _products.Add(product);
+            return _money >= prise;
         }
 
-        public void ShowAllProduct()
+        public void Bay(Product product)
         {
-            Console.Clear();
-
-            foreach (Product product in _products)
-            {
-                Console.WriteLine(product.Name + " " + product.Price);
-            }
-
-            Console.ReadKey();
+            _money = _money - product.Price;
+            _products.Add(product);
         }
     }
 

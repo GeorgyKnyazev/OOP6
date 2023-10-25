@@ -26,6 +26,8 @@ namespace OOP6
             const ConsoleKey BayProduktComand = ConsoleKey.D3;
             const ConsoleKey ExitoComand = ConsoleKey.D4;
 
+            Start();
+
             bool isWork = true;
 
             while (isWork)
@@ -35,9 +37,7 @@ namespace OOP6
                 Console.WriteLine($"Что бы посмотреть что есть у покупателя нажмите: {ShowBayerProduktComand}");
                 Console.WriteLine($"Для покупки товара нажмите: {BayProduktComand}");
                 Console.WriteLine($"Для выхода нажмите: {ExitoComand}");
-
-                Start();
-
+                                
                 ConsoleKeyInfo consoleKeyInfo = Console.ReadKey();
 
                 switch (consoleKeyInfo.Key)
@@ -117,7 +117,6 @@ namespace OOP6
         public void ShowAllProduct()
         {
             Console.Clear();
-
             Console.WriteLine("В кошельке:" + Money + "рублей");
 
             foreach (Product product in Products)

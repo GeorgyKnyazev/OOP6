@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace OOP6
 {
@@ -9,8 +10,17 @@ namespace OOP6
         {
             Shop shop = new Shop();
 
-            shop.stert();
+            shop.Work();
+        }
+    }
 
+    class Shop
+    {
+        private Seller _seller = new Seller(0);
+        private Bayer _bayer = new Bayer(70);
+
+        public void Work()
+        {
             const ConsoleKey ShowSellerProduktComand = ConsoleKey.D1;
             const ConsoleKey ShowBayerProduktComand = ConsoleKey.D2;
             const ConsoleKey BayProduktComand = ConsoleKey.D3;
@@ -26,48 +36,47 @@ namespace OOP6
                 Console.WriteLine($"Для покупки товара нажмите: {BayProduktComand}");
                 Console.WriteLine($"Для выхода нажмите: {ExitoComand}");
 
+                Start();
+
                 ConsoleKeyInfo consoleKeyInfo = Console.ReadKey();
 
-                switch ( consoleKeyInfo.Key)
+                switch (consoleKeyInfo.Key)
                 {
                     case ShowSellerProduktComand:
-                        shop.SellerShowStats();
+                        SellerShowStats();
                         break;
+
                     case ShowBayerProduktComand:
-                        shop.BayerShowStats();
+                        BayerShowStats();
                         break;
+
                     case BayProduktComand:
-                        shop.SellProduct();
+                        SellProduct();
                         break;
+
                     case ExitoComand:
                         isWork = false;
                         break;
                 }
             }
         }
-    }
 
-    class Shop
-    {
-        private Seller _seller = new Seller(0);
-        private Bayer _bayer = new Bayer(70);
-
-        public void stert()
+        private void Start()
         {
             _seller.ProductsAdd();
         }
 
-        public void BayerShowStats()
+        private void BayerShowStats()
         {
             _bayer.ShowAllProduct();
         }
 
-        public void SellerShowStats()
+        private void SellerShowStats()
         {
             _seller.ShowAllProduct();
         }
 
-        public void SellProduct()
+        private void SellProduct()
         {
             Product product;
 
@@ -78,7 +87,7 @@ namespace OOP6
                 if (_bayer.IsEnoughtMoney(product.Price))
                 {
                     _bayer.Bay(product);
-                    _seller.GiveProduct(product);
+                    _seller.RemoveProduct(product);
                     Console.WriteLine("Товар куплен");
                     Console.ReadKey();
                 }
@@ -108,6 +117,7 @@ namespace OOP6
         public void ShowAllProduct()
         {
             Console.Clear();
+
             Console.WriteLine("В кошельке:" + Money + "рублей");
 
             foreach (Product product in Products)
@@ -116,13 +126,7 @@ namespace OOP6
             }
 
             Console.ReadKey();
-        }
-
-        protected void AddProduct(Product product)
-        {
-            Products.Add(product);
-        }
-
+        }    
     }
 
     class Seller : Human
@@ -149,11 +153,10 @@ namespace OOP6
             return isFind;
         }
 
-        public Product GiveProduct(Product product)
+        public void RemoveProduct(Product product)
         {
             Money += product.Price;
             Products.Remove(product);
-            return product;
         }
 
         public void ProductsAdd()
@@ -182,6 +185,11 @@ namespace OOP6
         {
             Money -= product.Price;
             AddProduct(product);
+        }
+
+        private void AddProduct(Product product)
+        {
+            Products.Add(product);
         }
     }
 

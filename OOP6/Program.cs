@@ -7,40 +7,39 @@ namespace OOP6
     {
         static void Main(string[] args)
         {
-            Seller seller = new Seller(0);
-            Bayer bayer = new Bayer(70);
+            Shop shop = new Shop();
 
-            seller.ProductsAdd();
+            shop.stert();
 
-            const ConsoleKey ShowSellerProduktInMenu = ConsoleKey.D1;
-            const ConsoleKey ShowBayerProduktInMenu = ConsoleKey.D2;
-            const ConsoleKey BayProduktInMenu = ConsoleKey.D3;
-            const ConsoleKey ExitInMenu = ConsoleKey.D4;
+            const ConsoleKey ShowSellerProduktComand = ConsoleKey.D1;
+            const ConsoleKey ShowBayerProduktComand = ConsoleKey.D2;
+            const ConsoleKey BayProduktComand = ConsoleKey.D3;
+            const ConsoleKey ExitoComand = ConsoleKey.D4;
 
             bool isWork = true;
 
             while (isWork)
             {
                 Console.Clear();
-                Console.WriteLine($"Что бы посмотреть что есть у продавца нажмите: {ShowSellerProduktInMenu}");
-                Console.WriteLine($"Что бы посмотреть что есть у покупателя нажмите: {ShowBayerProduktInMenu}");
-                Console.WriteLine($"Для покупки товара нажмите: {BayProduktInMenu}");
-                Console.WriteLine($"Для выхода нажмите: {ExitInMenu}");
+                Console.WriteLine($"Что бы посмотреть что есть у продавца нажмите: {ShowSellerProduktComand}");
+                Console.WriteLine($"Что бы посмотреть что есть у покупателя нажмите: {ShowBayerProduktComand}");
+                Console.WriteLine($"Для покупки товара нажмите: {BayProduktComand}");
+                Console.WriteLine($"Для выхода нажмите: {ExitoComand}");
 
                 ConsoleKeyInfo consoleKeyInfo = Console.ReadKey();
 
                 switch ( consoleKeyInfo.Key)
                 {
-                    case ShowSellerProduktInMenu:
-                        seller.ShowAllProduct();
+                    case ShowSellerProduktComand:
+                        shop.SellerShowStats();
                         break;
-                    case ShowBayerProduktInMenu:
-                        bayer.ShowAllProduct();
+                    case ShowBayerProduktComand:
+                        shop.BayerShowStats();
                         break;
-                    case BayProduktInMenu:
-                        seller.SellProduct(bayer);
+                    case BayProduktComand:
+                        shop.SellProduct();
                         break;
-                    case ExitInMenu:
+                    case ExitoComand:
                         isWork = false;
                         break;
                 }
@@ -48,51 +47,38 @@ namespace OOP6
         }
     }
 
-    class Human
+    class Shop
     {
-        protected List<Product> _products = new List<Product>();
-        protected int _money;
+        private Seller _seller = new Seller(0);
+        private Bayer _bayer = new Bayer(70);
 
-        public Human(int money)
+        public void stert()
         {
-            _money = money;
-        }
-        public void ShowAllProduct()
-        {
-            Console.Clear();
-            Console.WriteLine("В кошельке:" + _money + "рублей");
-
-            foreach (Product product in _products)
-            {
-                Console.WriteLine(product.Name + " " + product.Price);
-            }
-
-            Console.ReadKey();
+            _seller.ProductsAdd();
         }
 
-        protected void AddProduct(Product product)
+        public void BayerShowStats()
         {
-            _products.Add(product);
+            _bayer.ShowAllProduct();
         }
 
-    }
+        public void SellerShowStats()
+        {
+            _seller.ShowAllProduct();
+        }
 
-    class Seller : Human
-    {
-        public Seller(int money) : base(money) { }
-
-        public void SellProduct(Bayer bayer)
+        public void SellProduct()
         {
             Product product;
 
-            bool isProductOnList = TryGetProduct(out product);
+            bool isProductOnList = _seller.TryGetProduct(out product);
 
-            if(isProductOnList == true)
+            if (isProductOnList == true)
             {
-                if (bayer.CheckSolvency(product.Price))
+                if (_bayer.IsEnoughtMoney(product.Price))
                 {
-                    bayer.Bay(product);
-                    Sell(product);
+                    _bayer.Bay(product);
+                    _seller.GiveProduct(product);
                     Console.WriteLine("Товар куплен");
                     Console.ReadKey();
                 }
@@ -108,8 +94,42 @@ namespace OOP6
                 Console.ReadKey();
             }
         }
+    }
 
-        private bool TryGetProduct(out Product product)
+    class Human
+    {
+        protected List<Product> Products = new List<Product>();
+        protected int Money;
+
+        public Human(int money)
+        {
+            Money = money;
+        }
+        public void ShowAllProduct()
+        {
+            Console.Clear();
+            Console.WriteLine("В кошельке:" + Money + "рублей");
+
+            foreach (Product product in Products)
+            {
+                Console.WriteLine(product.Name + " " + product.Price);
+            }
+
+            Console.ReadKey();
+        }
+
+        protected void AddProduct(Product product)
+        {
+            Products.Add(product);
+        }
+
+    }
+
+    class Seller : Human
+    {
+        public Seller(int money) : base(money) { }
+
+        public bool TryGetProduct(out Product product)
         {
             bool isFind = false;
             product = null;
@@ -117,7 +137,7 @@ namespace OOP6
             Console.Write("Введите имя товара: ");
             string userInput = Console.ReadLine();
 
-            foreach(Product products in _products)
+            foreach(Product products in Products)
             {
                 if (products.Name == userInput)
                 {
@@ -129,23 +149,23 @@ namespace OOP6
             return isFind;
         }
 
-        public Product Sell(Product product)
+        public Product GiveProduct(Product product)
         {
-            _money += product.Price;
-            _products.Remove(product);
+            Money += product.Price;
+            Products.Remove(product);
             return product;
         }
 
         public void ProductsAdd()
         {
-            _products.Add(new Product("чай", 10));
-            _products.Add(new Product("кофе", 20));
-            _products.Add(new Product("хлеб", 30));
-            _products.Add(new Product("торт", 40));
-            _products.Add(new Product("яблоко", 50));
-            _products.Add(new Product("виноград", 60));
-            _products.Add(new Product("апельсин", 70));
-            _products.Add(new Product("лимон", 80));
+            Products.Add(new Product("чай", 10));
+            Products.Add(new Product("кофе", 20));
+            Products.Add(new Product("хлеб", 30));
+            Products.Add(new Product("торт", 40));
+            Products.Add(new Product("яблоко", 50));
+            Products.Add(new Product("виноград", 60));
+            Products.Add(new Product("апельсин", 70));
+            Products.Add(new Product("лимон", 80));
         }
     }
 
@@ -153,15 +173,15 @@ namespace OOP6
     {
         public Bayer(int money) : base(money) { }
 
-        public bool CheckSolvency(int prise)
+        public bool IsEnoughtMoney(int prise)
         {
-            return _money >= prise;
+            return Money >= prise;
         }
 
         public void Bay(Product product)
         {
-            _money = _money - product.Price;
-            _products.Add(product);
+            Money -= product.Price;
+            AddProduct(product);
         }
     }
 

@@ -26,7 +26,7 @@ namespace OOP6
             const ConsoleKey BayProduktComand = ConsoleKey.D3;
             const ConsoleKey ExitoComand = ConsoleKey.D4;
 
-            Start();
+            AddProdurtInShop();
 
             bool isWork = true;
 
@@ -61,9 +61,9 @@ namespace OOP6
             }
         }
 
-        private void Start()
+        private void AddProdurtInShop()
         {
-            _seller.ProductsAdd();
+            _seller.AddProducts();
         }
 
         private void BayerShowStats()
@@ -78,16 +78,14 @@ namespace OOP6
 
         private void SellProduct()
         {
-            Product product;
+            bool isProductOnList = _seller.TryGetProduct(out Product product);
 
-            bool isProductOnList = _seller.TryGetProduct(out product);
-
-            if (isProductOnList == true)
+            if (isProductOnList)
             {
                 if (_bayer.IsEnoughtMoney(product.Price))
                 {
                     _bayer.Bay(product);
-                    _seller.RemoveProduct(product);
+                    _seller.SellProduct(product);
                     Console.WriteLine("Товар куплен");
                     Console.ReadKey();
                 }
@@ -152,13 +150,13 @@ namespace OOP6
             return isFind;
         }
 
-        public void RemoveProduct(Product product)
+        public void SellProduct(Product product)
         {
             Money += product.Price;
             Products.Remove(product);
         }
 
-        public void ProductsAdd()
+        public void AddProducts()
         {
             Products.Add(new Product("чай", 10));
             Products.Add(new Product("кофе", 20));
